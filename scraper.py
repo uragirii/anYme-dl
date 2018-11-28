@@ -72,7 +72,7 @@ def all_episode_of(anime_url: str) -> object:
     for x in anime_page_soup.find_all('h3'):
         anime_ep_links.append(x.a['href'])
 
-    # NOTE : I;m returning only first ep and as chiaanime shows revered list, also the episode lenght
+    # NOTE : I;m returning only first ep and as chiaanime shows revered list, also the episode length
     # Length is no longer needed (@02-45-09-11-2018) removed
     return anime_ep_links
 
