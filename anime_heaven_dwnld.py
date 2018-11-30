@@ -17,23 +17,6 @@ USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36
 SEARCH_URL = r'http://animeheaven.eu/search.php?q='
 BASE_URL = r'http://animeheaven.eu/'
 
-"""
-print(is_downloadable(r'http://s5vkxea.animeheaven.eu/720kl/msl/Re_ZERO_-Break_Time_from_Zero---1--1461571001__35d8e5.mp4?dd5d157'))
-# anime_search("re zero")
-# Testing if i need selenium for this or not.
-anime_url = r'http://animeheaven.eu/watch.php?a=Re%20ZERO%20-Break%20Time%20from%20Zero-&e=1'
-options = Options()
-options.headless = True
-chrome_driver = r'C:/Users/apoor/Drivers/chromedriver.exe'
-driver = webdriver.Chrome(chrome_driver,chrome_options=options)
-driver.get(anime_url)
-print("Sleep")
-time.sleep(3)
-print("Sleep off")
-inner_html = driver.execute_script("return document.body.innerHTML")
-htmlElem = BeautifulSoup(inner_html,'lxml')
-"""
-
 # step 1 _ anime search: complete
 
 
@@ -85,6 +68,11 @@ def print_anime_details(anime_link: str):
     print('\n', list(anime_soup.find_all(class_="infodes2"))[0].text, '\n')
 
 
+def download_file(url,filename,anime_name):
+    r = requests.get(url, allow_redirects=True)
+    open(os.path.join(anime_name,filename), 'wb').write(r.content)
+
+
 print("Welcome to ALPHA phase of anime downloader")
 print("Please make sure to report any problems faced\n\n")
 
@@ -117,3 +105,18 @@ for link in anime_page_soup.find_all(class_="infovan"):
 
 anime_ep_links = anime_ep_links[::-1]   # Episodes are displayed in reverse order
 
+# Step 3 _Begin  downloading the anime episodes
+# By default will save episodes in ./{anime-name}/
+print("Saving the episodes in the directory ./{0}/".format(pref_anime))
+os.mkdir(pref_anime)
+direc = './'+pref_anime+'/'
+for epi in range(pref_total_anime_ep):
+    print("Downloading episode num {0} from {1} :".format(epi+1, pref_total_anime_ep))
+    driver.get(anime_ep_links[epi])
+    time.sleep(3)
+    inner_html = driver.execute_script("return document.body.innerHTML")
+    epi_soup = BeautifulSoup(inner_html, 'lxml')
+    dwnld_lnk = list(epi_soup.find_all(class_='an'))[0]['href']
+    filename = pref_anime + "Ep " + str(epi+1)
+    download_file(dwnld_lnk,filename,pref_anime)
+driver.close()
