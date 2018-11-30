@@ -77,6 +77,14 @@ def episodes_available(anime_link: str):
     return total_ep
 
 
+def print_anime_details(anime_link: str):
+
+    anime_page = requests.get(anime_link)
+    anime_soup = BeautifulSoup(anime_page.text, "lxml")
+
+    print('\n', list(anime_soup.find_all(class_="infodes2"))[0].text, '\n')
+
+
 print("Welcome to ALPHA phase of anime downloader")
 print("Please make sure to report any problems faced\n\n")
 
@@ -86,4 +94,26 @@ pref_anime_link = BASE_URL + pref_anime_link
 
 print("Anime Name : {0}".format(pref_anime))
 
+print_anime_details(pref_anime_link)
+
 pref_total_anime_ep = episodes_available(pref_anime_link)
+
+# I will only initialize chrome driver once and it will be used everywhere
+
+options = Options()
+options.add_argument('log-level=3')
+options.headless = True
+chrome_driver = r'C:/Users/apoor/Drivers/chromedriver.exe'
+driver = webdriver.Chrome(chrome_driver, chrome_options=options)
+
+print("Getting all the episodes links:")
+driver.get(pref_anime_link)
+time.sleep(3)
+inner_html = driver.execute_script("return document.body.innerHTML")
+anime_page_soup = BeautifulSoup(inner_html, 'lxml')
+anime_ep_links = []
+for link in anime_page_soup.find_all(class_="infovan"):
+    anime_ep_links.append(BASE_URL+link['href'])
+
+anime_ep_links = anime_ep_links[::-1]   # Episodes are displayed in reverse order
+
