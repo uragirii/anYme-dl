@@ -5,6 +5,9 @@ import requests
 import time
 import os
 from bs4 import BeautifulSoup
+import zipfile
+import sys
+from urllib.request import urlretrieve
 from requests import Response
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -68,13 +71,32 @@ def print_anime_details(anime_link: str):
     print('\n', list(anime_soup.find_all(class_="infodes2"))[0].text, '\n')
 
 
-def download_file(url,filename,anime_name):
-    r = requests.get(url, allow_redirects=True)
-    open(os.path.join(anime_name,filename), 'wb').write(r.content)
+def reporthook(blocknum, blocksize, totalsize):
+    """
+    function copied from https://stackoverflow.com/questions/13881092/download-progressbar-for-python-3
+    """
+    readsofar = blocknum * blocksize
+    if totalsize > 0:
+        percent = readsofar * 1e2 / totalsize
+        s = '\rPercentage : %5.1f%% (%*d MB out of  %d MB)' % (
+            percent, len(str(totalsize)), readsofar//1048576, totalsize//1048576)
+        sys.stderr.write(s)
+        if readsofar >= totalsize: # near the end
+            sys.stderr.write("\n")
+    else: # total size is unknown
+        sys.stderr.write("read %d\n" % (readsofar,))
 
+
+def download_file(url,filename,folder):
+    print("Downloading file : " , filename)
+    urlretrieve(url, os.path.join(folder,filename), reporthook)
+    print("Download Complete")
 
 print("Welcome to ALPHA phase of anime downloader")
 print("Please make sure to report any problems faced\n\n")
+
+if not os.path.exists("Files"):         # Will store the program files in this folder
+    os.mkdir("Files")
 
 anime_query: str = input("Enter the name of the anime you want search\n")
 pref_anime, pref_anime_link = anime_search(anime_query)
@@ -91,7 +113,17 @@ pref_total_anime_ep = episodes_available(pref_anime_link)
 options = Options()
 options.add_argument('log-level=3')
 options.headless = True
-chrome_driver = r'C:/Users/apoor/Drivers/chromedriver.exe'
+chrome_driver = r'./Files/chromedriver.exe'
+if not os.path.exists(chrome_driver):
+    print("Chrome driver does not exist. Downloading it and saving in {Files} folder")
+    # TODO Downlaod chrome driver for platform specific
+    download_file("https://chromedriver.storage.googleapis.com/2.44/chromedriver_win32.zip", "chromedriver.zip", "Files")
+    print("Extracting components")
+    with zipfile.ZipFile(os.path.join("Files","chromedriver.zip"), "r") as zip_ref:
+        zip_ref.extractall("./Files")
+    print("Complete.")
+
+
 driver = webdriver.Chrome(chrome_driver, chrome_options=options)
 
 print("Getting all the episodes links:")
@@ -108,15 +140,28 @@ anime_ep_links = anime_ep_links[::-1]   # Episodes are displayed in reverse orde
 # Step 3 _Begin  downloading the anime episodes
 # By default will save episodes in ./{anime-name}/
 print("Saving the episodes in the directory ./{0}/".format(pref_anime))
-os.mkdir(pref_anime)
-direc = './'+pref_anime+'/'
+if not os.path.exists(pref_anime):
+     os.mkdir(pref_anime)
+
 for epi in range(pref_total_anime_ep):
     print("Downloading episode num {0} from {1} :".format(epi+1, pref_total_anime_ep))
     driver.get(anime_ep_links[epi])
     time.sleep(3)
     inner_html = driver.execute_script("return document.body.innerHTML")
     epi_soup = BeautifulSoup(inner_html, 'lxml')
+    # ERRC002 Abuse Protection
+
+    for abuse in epi_soup.find_all(class_='now2'):
+        if 'abuse protection' in abuse.text:
+            print("Triggered Abuse Protection, waiting for 60 seconds")
+            time.sleep(60)
+            driver.get(anime_ep_links[epi])
+            time.sleep(3)
+            inner_html = driver.execute_script("return document.body.innerHTML")
+            epi_soup = BeautifulSoup(inner_html, 'lxml')
+            break
+
     dwnld_lnk = list(epi_soup.find_all(class_='an'))[0]['href']
-    filename = pref_anime + "Ep " + str(epi+1)
+    filename = pref_anime + " Ep " + str(epi+1) + ".mp4"
     download_file(dwnld_lnk,filename,pref_anime)
 driver.close()
