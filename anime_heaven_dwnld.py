@@ -8,7 +8,6 @@ from bs4 import BeautifulSoup
 import zipfile
 import sys
 from urllib.request import urlretrieve
-from requests import Response
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
