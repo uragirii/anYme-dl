@@ -13,8 +13,8 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 
 
-
-USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227.1 Safari/537.36'
+USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2227' \
+             '.1 Safari/537.36'
 
 SEARCH_URL = r'http://animeheaven.eu/search.php?q='
 BASE_URL = r'http://animeheaven.eu/'
@@ -35,20 +35,27 @@ def anime_search(query: str):
         list_of_animes = []
 
         for anime_link in search_soup.find_all(class_ = "cona"):
-            if not anime_link in list_of_animes:
+            if anime_link not in list_of_animes:
                 list_of_animes.append(anime_link)
+
+        # TODO : check condition for zero search results
+
         print("The search results are :")
-        for anime_link,num in zip(list_of_animes, range(0, len(list_of_animes))):
+
+        for anime_link, num in zip(list_of_animes, range(0, len(list_of_animes))):
             print("[{0}] {1}".format(num+1, anime_link.text))
 
-        choice = int(input("Enter your preferred anime\n"))
-
-        # TODO : Check boundary condition for choice variable
+        while True:
+            choice = int(input("Enter your preferred anime\n"))
+            if not 0 < choice < len(list_of_animes):
+                print("Enter a valid choice between 1 and {}".format(len(list_of_animes)))
+            else:
+                break
 
         return list_of_animes[choice-1].text, list_of_animes[choice-1]['href']
 
 
-# Step 2 _ get all the episode number and there links (hopefully)
+# Step 2 _ get all the episode number and there links (hopefully) : complete
 
 
 def episodes_available(anime_link: str):
@@ -116,6 +123,7 @@ chrome_driver = r'./Files/chromedriver.exe'
 if not os.path.exists(chrome_driver):
     print("Chrome driver does not exist. Downloading it and saving in {Files} folder")
     # TODO Downlaod chrome driver for platform specific
+    # check using sys.platform, win32, linux, darwin
     download_file("https://chromedriver.storage.googleapis.com/2.44/chromedriver_win32.zip", "chromedriver.zip", "Files")
     print("Extracting components")
     with zipfile.ZipFile(os.path.join("Files","chromedriver.zip"), "r") as zip_ref:
