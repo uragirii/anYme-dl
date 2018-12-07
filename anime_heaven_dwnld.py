@@ -89,8 +89,8 @@ def reporthook(blocknum, blocksize, totalsize):
             duration+=0.001
         speed = int(readsofar / (1024 * duration))
         percent = readsofar * 1e2 / totalsize
-        s = '\rPercentage : %5.1f%% (%5.2f MB out of %d MB, Download Speed %d KB/s, %d seconds passed )' % (
-            percent, readsofar / 1048576, totalsize // 1048576, speed, duration)
+        s = '\rPercentage : %5.1f%% (%5.2f MB out of %5.2f MB, Download Speed %d KB/s, %d seconds passed )' % (
+            percent, readsofar / 1048576, totalsize / 1048576, speed, duration)
         sys.stderr.write(s)
         if readsofar >= totalsize:  # near the end
             sys.stderr.write("\n")
