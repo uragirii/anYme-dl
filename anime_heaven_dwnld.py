@@ -225,8 +225,6 @@ print("Please make sure to report any problems faced\n\n")
 anime_data = {}
 anime_data['followed'] = []
 anime_data['searched'] = []
-if not os.path.exists("Files"):  # Will store the program files in this folder
-    os.mkdir("Files")
 if not os.path.exists(os.path.join("Files", "anime_data")):
     pic = open(os.path.join("Files", "anime_data"), 'wb')
     pickle.dump(anime_data, pic)
@@ -237,6 +235,9 @@ else:
     for ani in anime_data['followed']:
         print(ani.name)
 """
+if not os.path.exists("Files"):  # Will store the program files in this folder
+    os.mkdir("Files")
+
 anime_query: str = input("Enter the name of the anime you want search\n")
 pref_anime, pref_anime_link = anime_search(anime_query)
 pref_anime_link = BASE_URL + pref_anime_link
