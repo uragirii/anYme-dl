@@ -152,7 +152,7 @@ class Anime:
     def dwnld_range(self, lowest: int, highest: int, cdriver):
         # Assuming that boundary condition have been checked
         for _epi in range(lowest, highest):
-            if not self.dwnld_single(_epi, driver):
+            if not self.dwnld_single(_epi-1, driver):
                 break
 
     def dwnld_single(self, epi_num: int, cdriver):
@@ -300,7 +300,7 @@ if not os.path.exists(anime.name):
 
 while True:
     episode_pref = input(
-        "Enter the range/episode you want to download.\n\n[ Enter '0' for downloading complete anime or two"
+        "Enter the range/episode you want to download.\n\n[ Enter '0' for downloading complete anime or two "
         "numbers between 1 and {} separated by '-' or just enter the episode number]\n".format(anime.episodes_avail))
 
     if episode_pref == '0':
