@@ -314,7 +314,7 @@ while True:
         else:
             print("You entered Invalid episode range.")
     else:
-        anime.dwnld_single(int(episode_pref-1), driver)
+        anime.dwnld_single(int(episode_pref)-1, driver)
         break
 driver.close()
 # Assuming Keyboard Iterruption or succesful excetution
