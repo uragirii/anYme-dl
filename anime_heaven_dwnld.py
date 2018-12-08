@@ -158,7 +158,7 @@ class Anime:
     def dwnld_single(self, epi_num: int, cdriver):
         # Assuming boundary conditions are checked
         try:
-            print("Downloading Episode num : {} | Total Available episodes : {}".format(epi_num, self.episodes_avail))
+            print("Downloading Episode num : {} | Total Available episodes : {}".format(epi_num+1, self.episodes_avail))
             driver.get(self.episodes_link[epi_num])
             time.sleep(3)
             inner_html = driver.execute_script("return document.body.innerHTML")
@@ -168,7 +168,7 @@ class Anime:
                 if 'abuse protection' in abuse.text:
                     print("Triggered Abuse Protection, waiting for 60 seconds")
                     time.sleep(60)
-                    driver.get(anime_ep_links[epi_num - 1])
+                    driver.get(anime_ep_links[epi_num])
                     time.sleep(3)
                     inner_html = driver.execute_script("return document.body.innerHTML")
                     epi_soup = BeautifulSoup(inner_html, 'lxml')
@@ -202,11 +202,12 @@ class Anime:
             # Maybe fixed
 
             dwnld_lnk = list(epi_soup.find_all(class_='an'))[0]['href']
-            filename = "{} Ep {}.mp4".format(anime.name, epi_num)
+            filename = "{} Ep {}.mp4".format(anime.name, epi_num+1)
+
 
             dwnld_status = download_file(dwnld_lnk, filename, anime.name)
             if dwnld_status:
-                self.episodes_dwnld.append(epi_num)
+                self.episodes_dwnld.append(epi_num+1)
             else:
                 return False
 
@@ -313,7 +314,7 @@ while True:
         else:
             print("You entered Invalid episode range.")
     else:
-        anime.dwnld_single(int(episode_pref), driver)
+        anime.dwnld_single(int(episode_pref-1), driver)
         break
 driver.close()
 # Assuming Keyboard Iterruption or succesful excetution
