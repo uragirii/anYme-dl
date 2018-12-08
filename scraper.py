@@ -33,7 +33,7 @@ def anime_search_query(query_name: str):
     :return:
     """
     if query_name is None:
-        raise INVALID_ANIME_NAME
+        raise ValueError
     else:
         search_url_final = SEARCH_URL+query_name.replace(" ", "%")
         search_page = requests.get(search_url_final)
